@@ -5,6 +5,7 @@ import re
 import types
 from datetime import datetime
 from itertools import chain, groupby
+from xlwt import Formula
 
 from trac.core import Component, implements
 from trac.env import Environment
@@ -27,7 +28,7 @@ except ImportError:
     from_utimestamp = lambda ts: _epoc + timedelta(seconds=ts or 0)
 
 from tracexceldownload.api import (get_excel_format, get_excel_mimetype,
-                                   get_workbook_writer)
+                                   get_workbook_writer, get_literal)
 from tracexceldownload.translation import _, dgettext, dngettext
 
 
@@ -370,10 +371,71 @@ class ExcelTicketModule(Component):
         writer.set_col_widths()
 
     def _get_cell_data(self, name, value, req, context, writer):
+
+        if name == 'tt_spent':
+            if not value:
+                value = 0
+                return value, name, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', value)[0])
+            return value, name, width, None
+
+        if name == 'tt_estimated':
+            if not value:
+                value = 0
+                return value, name, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', value)[0])
+            return value, name, width, None
+
+        if name == 'tt_remaining':
+            if not value:
+                value = 0
+                return value, name, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', value)[0])
+            return value, name, width, None
+
+        if name == 'br_planned':
+            if not value:
+                value = 0
+                return value, name, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', value)[0])
+            return value, name, width, None
+
+        if name == 'children':
+            # this never has a value for some reason
+            if value:
+                import pdb; pdb.set_trace()
+            pass
+
+        if name == 'parent':
+            if not value:
+                value = ''
+                return value, name, None, None
+            values = re.findall('[\d]+', value)
+            parents = ''
+            if len(values) == 1:
+                value = values[0]
+                url = self.env.abs_href.ticket(value)
+                value = '#%d' % int(value)
+                value = Formula('HYPERLINK("%s",%s)' % (url, get_literal(value)))
+                width = len(values[0])
+                return value, name, width, 1
+            for value in values:
+                # hyperlinks aren't working with multiple parents, set as string
+                url = self.env.abs_href.ticket(value)
+                value = '#%d' % int(value)
+                parents += value + ' '
+            width = len(values) * 3
+            return parents, name, width, 1
+
         if name == 'id':
             url = self.env.abs_href.ticket(value)
             value = '#%d' % value
             width = len(value)
+            value = Formula('HYPERLINK("%s",%s)' % (url, get_literal(value)))
             return value, 'id', width, 1
 
         if isinstance(value, datetime):
@@ -475,6 +537,49 @@ class ExcelReportModule(Component):
 
     def _get_cell_data(self, req, col, cell, row, writer):
         value = cell['value']
+        
+        if col == 'tt_spent':
+            if not value:
+                value = 0
+                return value, col, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', cell['value'])[0])
+            return value, col, width, None
+
+        if col == 'tt_estimated':
+            if not value:
+                value = 0
+                return value, col, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', cell['value'])[0])
+            return value, col, width, None
+
+        if col == 'tt_remaining':
+            if not value:
+                value = 0
+                return value, col, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', cell['value'])[0])
+            return value, col, width, None
+
+        if col == 'br_planned':
+            if not value:
+                value = 0
+                return value, col, None, None
+            width = len(value)
+            value = float(re.findall('[\d\.]+', value)[0])
+            return value, col, width, None
+
+        if col == 'parent':
+            if not value:
+                value = ''
+                return value, col, None, None
+            value = int(float(re.findall('[\d]+', value)[0]))
+            url = self.env.abs_href.ticket(value)
+            value = '#%d' % value
+            width = len(value)
+            value = Formula('HYPERLINK("%s",%s)' % (url, get_literal(value)))
+            return value, col, width, 1
 
         if col == 'report':
             url = self.env.abs_href.report(value)
