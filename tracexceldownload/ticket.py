@@ -377,7 +377,10 @@ class ExcelTicketModule(Component):
                 value = 0
                 return value, name, None, None
             width = len(value)
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                pass  # leave value as is
             return value, name, width, None
 
         if name == 'tt_estimated':
@@ -385,7 +388,10 @@ class ExcelTicketModule(Component):
                 value = 0
                 return value, name, None, None
             width = len(value)
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                pass  # leave value as is
             return value, name, width, None
 
         if name == 'tt_remaining':
@@ -393,7 +399,10 @@ class ExcelTicketModule(Component):
                 value = 0
                 return value, name, None, None
             width = len(value)
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                pass  # leave value as is
             return value, name, width, None
 
         if name == 'br_planned':
@@ -401,7 +410,10 @@ class ExcelTicketModule(Component):
                 value = 0
                 return value, name, None, None
             width = len(value)
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                pass  # leave value as is
             return value, name, width, None
 
         if name == 'children':
@@ -565,7 +577,10 @@ class ExcelReportModule(Component):
                 value = 0
                 return value, col, None, None
             width = len(value)
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                pass  # leave value as is
             return value, col, width, None
 
         if col == 'parent':
