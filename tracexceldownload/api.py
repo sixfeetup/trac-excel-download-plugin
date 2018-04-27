@@ -24,6 +24,10 @@ from tracexceldownload.translation import ChoiceOption, N_, ngettext
 __all__ = ('get_excel_format', 'get_excel_mimetype', 'get_workbook_writer')
 
 
+def get_literal(text):
+    return u'"%s"' % to_unicode(text).replace('"', '""')
+
+
 def get_excel_format(env):
     format = ExcelDownloadConfig(env).format
     if format == '(auto)':
@@ -478,12 +482,12 @@ class XlwtWorkbookWriter(AbstractWorkbookWriter):
 
         def style_date():
             style = style_base()
-            style.num_format_str = 'YYYY-MM-DD'
+            style.num_format_str = 'yyyy-mm-dd'
             return style
 
         def style_datetime():
             style = style_base()
-            style.num_format_str = 'YYYY-MM-DD HH:MM:SS'
+            style.num_format_str = 'yyyy-mm-dd hh:mm:ss'
             return style
 
         def style_default():
@@ -491,8 +495,23 @@ class XlwtWorkbookWriter(AbstractWorkbookWriter):
             style.num_format_str = '@'    # String
             return style
 
+        # Adding a news styles for rows that are numbers
+        def style_num():
+            style = style_base()
+            style.num_format_str = '#,##0.00'   # Numbers
+            return style
+
+        def style_complex():
+            style = style_base()
+            style.num_format_str = '#,##0'
+            return style
+
         styles = {'header': header, 'header2': header2, 'thead': thead}
         for key, func in (('id', style_id),
+                          ('tt_spent', style_num),
+                          ('br_planned', style_complex),
+                          ('tt_estimated', style_num),
+                          ('tt_remaining', style_num),
                           ('milestone', style_milestone),
                           ('[time]', style_time),
                           ('[date]', style_date),
