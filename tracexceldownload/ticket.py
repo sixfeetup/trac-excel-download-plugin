@@ -406,8 +406,6 @@ class ExcelTicketModule(Component):
 
         if name == 'children':
             # this never has a value for some reason
-            if value:
-                import pdb; pdb.set_trace()
             pass
 
         if name == 'parent':
