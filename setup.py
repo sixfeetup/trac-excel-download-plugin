@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 setup(
-    name = 'ExcelDownloadPlugin',
+    name = 'TracExcelDownload',
     version = '0.12.0.7',
     description = 'Allow to download query and report page as Excel',
     license = 'BSD', # the same as Trac
